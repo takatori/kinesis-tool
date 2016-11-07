@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["takatori <takatorisatoshi@team-lab.com>"]
 
 [dependencies]
+rusoto = {version = "0.17", features = ["kinesis"]}
