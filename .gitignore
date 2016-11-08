@@ -9,3 +9,6 @@ Cargo.lock
 
 # for Mac
 .DS_Store
+
+
+.envrc
