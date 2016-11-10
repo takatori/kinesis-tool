@@ -25,18 +25,18 @@ impl<P: ProvideAwsCredentials, D: DispatchSignedRequest> KinesisHelper<P, D> {
         KinesisHelper { client: KinesisClient::with_request_dispatcher(request_dispatcher, credentials_provider, region) }
     }
     
-    pub fn list_streams(&self) {
+    pub fn list_streams(&self) -> String {
         
         let request = ListStreamsInput::default();
 
         match self.client.list_streams(&request) {
             Ok(output) => {
-                println!("{:?}", output);
+                format!("{:?}", output)
             }
             Err(error) => {
-                println!("Error: {:?}", error);
+                format!("Error: {:?}", error)
             }
-        };        
+        }
     }
 }
 
