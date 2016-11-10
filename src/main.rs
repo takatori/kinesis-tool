@@ -6,7 +6,6 @@ mod screen;
     
 use rusoto::{DefaultCredentialsProvider, Region};
 use hyper::Client;
-
 use kinesis::KinesisHelper;
 use screen::Screen;
 

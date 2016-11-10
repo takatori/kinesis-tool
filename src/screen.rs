@@ -11,7 +11,7 @@ pub struct Screen {
 }
 
 impl Screen {
-    
+     
     pub fn new() -> Screen {
         let rustbox = match RustBox::init(Default::default()) {
             Result::Ok(v) => v,
@@ -28,6 +28,13 @@ impl Screen {
         self.rustbox.present();   
     }
 
+    pub fn draw_strem_names(&self, streamNames: Vec<String>) {
+
+        for (num, streamName) in streamNames.iter().enumerate() {
+            self.rustbox.print(0, num, rustbox::RB_BOLD, Color::Green, Color::Black, &streamName);
+        }
+    }
+
     pub fn draw<P, D>(&self, kinesis_helper: &KinesisHelper<P, D>) where P: ProvideAwsCredentials, D: DispatchSignedRequest {
         
         loop {
@@ -42,7 +49,7 @@ impl Screen {
                         },
                         Key::Char('l') => {
                             let streams = kinesis_helper.list_streams();
-                            self.rustbox.print(0, 1, rustbox::RB_BOLD, Color::White, Color::Black, &streams);
+                            self.draw_strem_names(streams)
                         },
                         _ => { }
                     }
