@@ -1,6 +1,5 @@
 extern crate rusoto;
 
-use std::error::Error;
 use std::default::Default;
 
 use rusoto::{
