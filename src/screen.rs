@@ -22,16 +22,22 @@ impl Screen {
     }
 
     pub fn draw_first(&self) {
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::White, Color::Black, "> Hello, world!");
-        self.rustbox.print(0, 1, rustbox::RB_BOLD, Color::White, Color::Black, "> Press 'q' to quit.");
-        self.rustbox.print(0, 2, rustbox::RB_BOLD, Color::White, Color::Black, "> Press 'l' to show kinesis streams.");    
+        self.draw_help();
         self.rustbox.present();   
     }
 
+    pub fn draw_help(&self) {
+        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::White, Color::Black, "> Hello!");
+        self.rustbox.print(0, 1, rustbox::RB_BOLD, Color::White, Color::Black, "> Press 'q' to quit.");
+        self.rustbox.print(0, 2, rustbox::RB_BOLD, Color::White, Color::Black, "> Press 'l' to show kinesis streams.");    
+    }    
+
     pub fn draw_strem_names(&self, streamNames: Vec<String>) {
 
+        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Stream List");
+        
         for (num, streamName) in streamNames.iter().enumerate() {
-            self.rustbox.print(0, num, rustbox::RB_BOLD, Color::Green, Color::Black, &streamName);
+            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &streamName));
         }
     }
 
@@ -51,11 +57,11 @@ impl Screen {
                             let streams = kinesis_helper.list_streams();
                             self.draw_strem_names(streams)
                         },
-                        _ => { }
+                        _ => { self.draw_help() }
                     }
                 },
                 Err(e) => panic!("{}", e.description()),
-                _ => { }
+                _ => { self.draw_help() }
             }
             self.rustbox.present();
         }
