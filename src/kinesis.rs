@@ -4,12 +4,13 @@ use std::default::Default;
 
 use rusoto::{
     ProvideAwsCredentials,
-    DispatchSignedRequest,    
-    Region
+    DispatchSignedRequest,
+    Region,
 };
 use rusoto::kinesis::{
     KinesisClient,
-    ListStreamsInput
+    ListStreamsInput,
+    DescribeStreamInput,
 };
 
 
@@ -34,6 +35,24 @@ impl<P: ProvideAwsCredentials, D: DispatchSignedRequest> KinesisHelper<P, D> {
             }
             Err(error) => {
                 println!("Error: {:?}", error);
+                vec!()
+            }
+        }
+    }
+
+    pub fn describe_shards(&self, stream_name: String) -> Vec<String> {
+
+        let stream = DescribeStreamInput {
+            stream_name: stream_name,
+            limit: None,
+            exclusive_start_shard_id: None,
+        };
+
+        match self.client.describe_stream(&stream) {
+            Ok(output) => {
+                output.stream_description.shards.iter().map(|x| &x.shard_id).cloned().collect()
+            },
+            Err(error) => {
                 vec!()
             }
         }
