@@ -54,8 +54,14 @@ impl Screen {
                             break;
                         },
                         Key::Char('l') => {
-                            let streams = kinesis_helper.list_streams();
-                            self.draw_strem_names(streams)
+                            match kinesis_helper.list_streams() {
+                                Ok(streams) => {
+                                    self.draw_strem_names(streams)                                    
+                                }
+                                Err(e) => {
+                                    println!("{:?}", e);
+                                }
+                            }
                         },
                         _ => { self.draw_help() }
                     }
