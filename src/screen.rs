@@ -32,21 +32,22 @@ impl Screen {
         self.rustbox.print(0, 2, rustbox::RB_BOLD, Color::White, Color::Black, "> Press 'l' to show kinesis streams.");    
     }    
 
-    pub fn draw_strem_names(&self, streamNames: Vec<String>) {
+    pub fn draw_strem_names(&self, stream_names: Vec<String>) {
 
         self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Stream List");
         
-        for (num, streamName) in streamNames.iter().enumerate() {
-            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &streamName));
+        for (num, stream_name) in stream_names.iter().enumerate() {
+            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &stream_name));
         }
     }
 
-    pub fn draw<P, D>(&self, kinesis_helper: &KinesisHelper<P, D>) where P: ProvideAwsCredentials, D: DispatchSignedRequest {
+    pub fn draw(&self, kinesis_helper: &KinesisHelper) {
         
         loop {
             
             self.rustbox.clear();
 
+            // wait for keybord event
             match self.rustbox.poll_event(false) {
                 Ok(rustbox::Event::KeyEvent(key)) => {
                     match key {
@@ -56,7 +57,7 @@ impl Screen {
                         Key::Char('l') => {
                             match kinesis_helper.list_streams() {
                                 Ok(streams) => {
-                                    self.draw_strem_names(streams)                                    
+                                    self.draw_strem_names(streams)
                                 }
                                 Err(e) => {
                                     println!("{:?}", e);
@@ -64,7 +65,7 @@ impl Screen {
                             }
                         },
                         _ => { self.draw_help() }
-                    }
+                   }
                 },
                 Err(e) => panic!("{}", e.description()),
                 _ => { self.draw_help() }
