@@ -2,8 +2,6 @@ extern crate rustbox;
 
 use rusoto::{
     DefaultCredentialsProvider,
-    ProvideAwsCredentials,
-    DispatchSignedRequest,    
     Region
 };
 
@@ -43,14 +41,10 @@ impl Controller {
         
         loop {
             
-            self.screen.clear();
-            
             state = match state {
                 State::StreamList(streams) => {
                     self.screen.draw_strem_names(streams);
-                    self.screen.present();
                     
-                    // wait for keybord event
                     match self.screen.poll_event() {
                         
                         Key::Char('q') => {
@@ -65,9 +59,8 @@ impl Controller {
                 },
                 State::Root => {
                     
-                    self.screen.draw_first();
+                    self.screen.draw_help();
 
-                    // wait for keybord event
                     match self.screen.poll_event() {
                         
                         Key::Char('q') => {
@@ -91,7 +84,6 @@ impl Controller {
                 }
             };
                  
-            self.screen.present();
         }
     }
 }
