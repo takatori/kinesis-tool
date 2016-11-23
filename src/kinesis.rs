@@ -14,18 +14,18 @@ use rusoto::kinesis::{
     DescribeStreamInput,
 };
 
-pub struct KinesisHelper {
-    client: KinesisClient<ProvideAwsCredentials, DispatchSignedRequest>
+pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
+    client: KinesisClient<P, D>,
 }
 
-impl KinesisHelper {
+impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
     
-    fn new(request_dispatcher: DispatchSignedRequest, credentials_provider: ProvideAwsCredentials, region: Region) -> KinesisHelper {
+    pub fn new(request_dispatcher: D, credentials_provider: P, region: Region) -> KinesisHelper<P, D> {
         
         KinesisHelper { client: KinesisClient::with_request_dispatcher(request_dispatcher, credentials_provider, region) }
     }
     
-    fn list_streams(&self) -> Result<Vec<String>, Box<Error>> {
+    pub fn list_streams(&self) -> Result<Vec<String>, Box<Error>> {
         
         let request = ListStreamsInput::default();
         let result = try!(self.client.list_streams(&request));
@@ -33,7 +33,7 @@ impl KinesisHelper {
             
     }
 
-    fn describe_shards(&self, stream_name: String) -> Result<Vec<String>, Box<Error>> {
+    pub fn describe_shards(&self, stream_name: String) -> Result<Vec<String>, Box<Error>> {
 
         let stream = DescribeStreamInput {
             stream_name: stream_name,
@@ -45,5 +45,5 @@ impl KinesisHelper {
         Ok(result.stream_description.shards.iter().map(|x| &x.shard_id).cloned().collect())
             
     }
+    
 }
-

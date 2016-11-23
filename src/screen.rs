@@ -1,8 +1,7 @@
 extern crate rustbox;
 
 use std::error::Error;
-use self::rustbox::{Color, RustBox};
-use self::rustbox::Key;
+use self::rustbox::{Color, RustBox, Key};
 use super::rusoto::{ProvideAwsCredentials, DispatchSignedRequest};
 use kinesis::KinesisHelper;
 
@@ -19,6 +18,14 @@ impl Screen {
         };
 
         Screen { rustbox: rustbox }
+    }
+
+    pub fn present(&self) {
+        self.rustbox.present();
+    }
+
+    pub fn clear(&self) {
+        self.rustbox.clear();
     }
 
     pub fn draw_first(&self) {
@@ -41,36 +48,12 @@ impl Screen {
         }
     }
 
-    pub fn draw(&self, kinesis_helper: &KinesisHelper) {
-        
-        loop {
-            
-            self.rustbox.clear();
-
-            // wait for keybord event
-            match self.rustbox.poll_event(false) {
-                Ok(rustbox::Event::KeyEvent(key)) => {
-                    match key {
-                        Key::Char('q') => {
-                            break;
-                        },
-                        Key::Char('l') => {
-                            match kinesis_helper.list_streams() {
-                                Ok(streams) => {
-                                    self.draw_strem_names(streams)
-                                }
-                                Err(e) => {
-                                    println!("{:?}", e);
-                                }
-                            }
-                        },
-                        _ => { self.draw_help() }
-                   }
-                },
-                Err(e) => panic!("{}", e.description()),
-                _ => { self.draw_help() }
-            }
-            self.rustbox.present();
+    pub fn poll_event(&self) -> Key {
+        match self.rustbox.poll_event(false) {
+            Ok(rustbox::Event::KeyEvent(key)) => key,
+            Err(e) => panic!("{}", e.description()),
+            _ => panic!("error")
         }
     }
 }
+
