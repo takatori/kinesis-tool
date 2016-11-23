@@ -33,10 +33,10 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
             
     }
 
-    pub fn describe_shards(&self, stream_name: String) -> Result<Vec<String>, Box<Error>> {
+    pub fn describe_shards(&self, stream_name: &str) -> Result<Vec<String>, Box<Error>> {
 
         let stream = DescribeStreamInput {
-            stream_name: stream_name,
+            stream_name: stream_name.to_string(),
             limit: None,
             exclusive_start_shard_id: None,
         };

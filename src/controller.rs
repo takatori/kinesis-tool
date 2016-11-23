@@ -14,7 +14,7 @@ use super::screen::Screen;
 enum State {
     Root,
     StreamList(Vec<String>),
-    ShardsList,    
+    ShardList(Vec<String>),    
 }
     
 pub struct Controller {
@@ -43,19 +43,38 @@ impl Controller {
             
             state = match state {
                 State::StreamList(streams) => {
-                    self.screen.draw_strem_names(streams);
+                    
+                    self.screen.draw_strem_names(&streams);
                     
                     match self.screen.poll_event() {
                         
                         Key::Char('q') => {
                             break;
                         },
+                        Key::Char(i) => {
+                            
+                            let n = i.to_digit(10).unwrap();
+                            let ref stream_name = streams[n as usize];
+                            
+                            match kinesis_helper.describe_shards(stream_name) {
+                                Ok(shards) => State::ShardList(shards),
+                                Err(e) => State::Root,
+                            }
+                        }
                         _ => State::Root
                             
                     }
                 },
-                State::ShardsList => {
-                    State::Root                    
+                State::ShardList(shards) => {
+                    self.screen.draw_shards(&shards);                    
+
+                    match self.screen.poll_event() {
+                        
+                        Key::Char('q') => {
+                            break;
+                        },
+                        _ => State::Root
+                    }                    
                 },
                 State::Root => {
                     
@@ -68,9 +87,7 @@ impl Controller {
                         }
                         Key::Char('l') => {
                             match kinesis_helper.list_streams() {
-                                Ok(streams) => {
-                                    State::StreamList(streams)
-                                }
+                                Ok(streams) => State::StreamList(streams),
                                 Err(e) => {
                                     println!("{:?}", e);
                                     State::Root
