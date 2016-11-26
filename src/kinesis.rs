@@ -45,5 +45,17 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
         Ok(result.stream_description.shards.iter().map(|x| &x.shard_id).cloned().collect())
             
     }
+
+    pub fn get_shard_iterator(&self, stream_name: &str, shard_id: &str) -> Result<String, Box<Error>> {
+
+        let input = GetShardIteratorInput {
+            shard_id: shard_id.to_string(),
+            shard_iterator_type: "TRIM_HORIZON",
+            stream_name: stream_name.to_string(),
+        };
+        
+        let result = try!(self.client.get_shard_iterator(&input));
+        Ok(result.shard_iterator.unwrap())
+    }
     
 }
