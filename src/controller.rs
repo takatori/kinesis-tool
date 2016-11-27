@@ -14,7 +14,8 @@ use super::screen::Screen;
 enum State {
     Root,
     StreamList(Vec<String>),
-    ShardList(Vec<String>),    
+    ShardList(String, Vec<String>),
+    // RecordList(String, String, Vec<String>),  // stream_name, iterator_id
 }
     
 pub struct Controller {
@@ -57,7 +58,7 @@ impl Controller {
                             let ref stream_name = streams[n as usize];
                             
                             match kinesis_helper.describe_shards(stream_name) {
-                                Ok(shards) => State::ShardList(shards),
+                                Ok(shards) => State::ShardList(stream_name, shards),
                                 Err(e) => State::Root,
                             }
                         }
@@ -65,7 +66,7 @@ impl Controller {
                             
                     }
                 },
-                State::ShardList(shards) => {
+                State::ShardList(stream_name, shards) => {
                     self.screen.draw_shards(&shards);                    
 
                     match self.screen.poll_event() {
@@ -73,6 +74,16 @@ impl Controller {
                         Key::Char('q') => {
                             break;
                         },
+                        Key::Char(i) => {
+                            
+                            let n = i.to_digit(10).unwrap();
+                            let ref shard_id = shards[n as usize];
+                            
+                            match kinesis_helper.describe_shards(stream_name) {
+                                Ok(shards) => State::ShardList(shards),
+                                Err(e) => State::Root,
+                            }
+                        }                        
                         _ => State::Root
                     }                    
                 },
