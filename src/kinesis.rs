@@ -12,6 +12,9 @@ use rusoto::kinesis::{
     KinesisClient,
     ListStreamsInput,
     DescribeStreamInput,
+    GetShardIteratorInput,
+    GetRecordsInput,
+    Record,
 };
 
 pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
@@ -50,12 +53,28 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
 
         let input = GetShardIteratorInput {
             shard_id: shard_id.to_string(),
-            shard_iterator_type: "TRIM_HORIZON",
+            starting_sequence_number: None,            
+            shard_iterator_type: "TRIM_HORIZON".to_string(),
             stream_name: stream_name.to_string(),
+            timestamp: None,            
         };
         
         let result = try!(self.client.get_shard_iterator(&input));
         Ok(result.shard_iterator.unwrap())
     }
+
+    pub fn get_records(&self, shard_iterator: &str) -> Result<(Vec<Record>, Option<String>), Box<Error>> {
+
+        let input = GetRecordsInput {
+            // limit: Option<GetRecordsInputLimit>,
+            limit: None,
+            shard_iterator: shard_iterator.to_string(),
+        };
+
+        let result = try!(self.client.get_records(&input));
+        Ok((result.records, result.next_shard_iterator))
+    }
+
+
     
 }

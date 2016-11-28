@@ -4,6 +4,7 @@ use rusoto::{
     DefaultCredentialsProvider,
     Region
 };
+use rusoto::kinesis::Record;
 
 use hyper::Client;
 use self::rustbox::Key;
@@ -13,9 +14,11 @@ use super::screen::Screen;
 
 enum State {
     Root,
+    End,
     StreamList(Vec<String>),
     ShardList(String, Vec<String>),
-    // RecordList(String, String, Vec<String>),  // stream_name, iterator_id
+    FetchRecordList(String, Vec<Record>),  // stream_name, iterator_id
+    RecordList(Vec<Record>),  // stream_name, iterator_id    
 }
     
 pub struct Controller {
@@ -48,17 +51,14 @@ impl Controller {
                     self.screen.draw_strem_names(&streams);
                     
                     match self.screen.poll_event() {
-                        
-                        Key::Char('q') => {
-                            break;
-                        },
+                        Key::Char('q') => State::End,                                                
                         Key::Char(i) => {
                             
                             let n = i.to_digit(10).unwrap();
                             let ref stream_name = streams[n as usize];
                             
                             match kinesis_helper.describe_shards(stream_name) {
-                                Ok(shards) => State::ShardList(stream_name, shards),
+                                Ok(shards) => State::ShardList(stream_name.to_string(), shards),
                                 Err(e) => State::Root,
                             }
                         }
@@ -70,32 +70,48 @@ impl Controller {
                     self.screen.draw_shards(&shards);                    
 
                     match self.screen.poll_event() {
-                        
-                        Key::Char('q') => {
-                            break;
-                        },
+                        Key::Char('q') => State::End,                        
                         Key::Char(i) => {
                             
                             let n = i.to_digit(10).unwrap();
                             let ref shard_id = shards[n as usize];
                             
-                            match kinesis_helper.describe_shards(stream_name) {
-                                Ok(shards) => State::ShardList(shards),
+                            match kinesis_helper.get_shard_iterator(&stream_name, shard_id) {
+                                Ok(shard_iterator) => State::FetchRecordList(shard_iterator, vec!()),
                                 Err(e) => State::Root,
                             }
                         }                        
                         _ => State::Root
                     }                    
                 },
+                State::FetchRecordList(shard_iterator, records) => {
+
+                    match kinesis_helper.get_records(&shard_iterator) {
+                        Ok((r, i)) =>
+                            match i {
+                                Some(i) => State::FetchRecordList(i, records.push(r)),
+                                None =>State::RecordList(r),
+                            },
+                        Err(e) => State::Root,
+                    }
+                    
+                },                
+                State::RecordList(records) => {
+
+                    println!("{:?}", records);
+                    
+                    match self.screen.poll_event() {
+                        Key::Char('q') => State::End,                        
+                        _ => State::Root                            
+                    }                                        
+                    
+                },
                 State::Root => {
                     
                     self.screen.draw_help();
 
                     match self.screen.poll_event() {
-                        
-                        Key::Char('q') => {
-                            break;
-                        }
+                        Key::Char('q') => State::End,
                         Key::Char('l') => {
                             match kinesis_helper.list_streams() {
                                 Ok(streams) => State::StreamList(streams),
@@ -109,6 +125,9 @@ impl Controller {
                             
                     }                    
                     
+                },
+                State::End => {
+                    break;
                 }
             };
                  
