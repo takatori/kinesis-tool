@@ -57,7 +57,19 @@ impl Screen {
         self.rustbox.present();                
     }
 
+    pub fn draw_records(&self, records: &Vec<String>) {
         
+        self.rustbox.clear();
+        
+        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Record List");
+
+        for (num, record) in records.iter().enumerate() {
+            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &record));
+        }        
+
+        self.rustbox.present();                        
+    }
+
     pub fn poll_event(&self) -> Key {
         match self.rustbox.poll_event(false) {
             Ok(rustbox::Event::KeyEvent(key)) => key,
