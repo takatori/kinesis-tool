@@ -17,8 +17,7 @@ enum State {
     End,
     StreamList(Vec<String>),
     ShardList(String, Vec<String>),
-    FetchRecordList(String, Vec<Record>),  // stream_name, iterator_id
-    RecordList(Vec<Record>),  // stream_name, iterator_id    
+    RecordList(String, Vec<Record>),  // stream_name, iterator_id
 }
     
 pub struct Controller {
@@ -67,6 +66,7 @@ impl Controller {
                     }
                 },
                 State::ShardList(stream_name, shards) => {
+                    
                     self.screen.draw_shards(&shards);                    
 
                     match self.screen.poll_event() {
@@ -77,33 +77,35 @@ impl Controller {
                             let ref shard_id = shards[n as usize];
                             
                             match kinesis_helper.get_shard_iterator(&stream_name, shard_id) {
-                                Ok(shard_iterator) => State::FetchRecordList(shard_iterator, vec!()),
+                                Ok(shard_iterator) => State::RecordList(shard_iterator, vec!()),
                                 Err(e) => State::Root,
                             }
                         }                        
                         _ => State::Root
                     }                    
                 },
-                State::FetchRecordList(shard_iterator, records) => {
+                State::RecordList(shard_iterator, records) => {
 
+                    if records.len() != 0 {
+                        // println!("{:?}", records[0].data);
+                        println!("{:?}", String::from_utf8_lossy(&records[0].data));                        
+                    }
+
+                    // let a = kinesis_helper.convert(&records[0]);
+                        
                     match kinesis_helper.get_records(&shard_iterator) {
                         Ok((r, i)) =>
                             match i {
-                                Some(i) => State::FetchRecordList(i, records.push(r)),
-                                None =>State::RecordList(r),
+                                Some(i) => State::RecordList(i, r),
+                                None => {
+                                    match self.screen.poll_event() {
+                                        Key::Char('q') => State::End,
+                                        _ => State::Root
+                                    }
+                                }
                             },
                         Err(e) => State::Root,
                     }
-                    
-                },                
-                State::RecordList(records) => {
-
-                    println!("{:?}", records);
-                    
-                    match self.screen.poll_event() {
-                        Key::Char('q') => State::End,                        
-                        _ => State::Root                            
-                    }                                        
                     
                 },
                 State::Root => {
@@ -115,10 +117,7 @@ impl Controller {
                         Key::Char('l') => {
                             match kinesis_helper.list_streams() {
                                 Ok(streams) => State::StreamList(streams),
-                                Err(e) => {
-                                    println!("{:?}", e);
-                                    State::Root
-                                }
+                                Err(e) =>  State::Root
                             }
                         },
                         _ => State::Root
