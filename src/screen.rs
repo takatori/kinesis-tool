@@ -20,6 +20,9 @@ impl Screen {
     }
 
     pub fn draw_help(&self) {
+
+        self.rustbox.clear();
+        
         let width = self.rustbox.width();
         let dummy_str = iter::repeat(" ").take(width).collect::<String>();
         

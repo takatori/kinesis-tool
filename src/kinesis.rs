@@ -1,13 +1,18 @@
 extern crate rusoto;
+extern crate flate2;
 
 use std::default::Default;
 use std::error::Error;
+
+use std::io::prelude::*;
+use self::flate2::read::GzDecoder;
     
 use rusoto::{
     ProvideAwsCredentials,
     DispatchSignedRequest,
     Region,
 };
+
 use rusoto::kinesis::{
     KinesisClient,
     ListStreamsInput,
@@ -16,6 +21,8 @@ use rusoto::kinesis::{
     GetRecordsInput,
     Record,
 };
+
+
 
 pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
     client: KinesisClient<P, D>,
@@ -27,6 +34,20 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
         
         KinesisHelper { client: KinesisClient::with_request_dispatcher(request_dispatcher, credentials_provider, region) }
     }
+
+    pub fn decode_records(&self, records: &[Record]) -> Vec<String> {
+        records.iter().map(|record| self.decode(&record)).collect::<Vec<String>>()
+    }
+
+
+    pub fn decode(&self, record: &Record) -> String {
+        
+        let mut d = GzDecoder::new(&record.data[..]).unwrap();
+        let mut s = String::new();
+        d.read_to_string(&mut s).unwrap();
+        s
+    }
+
     
     pub fn list_streams(&self) -> Result<Vec<String>, Box<Error>> {
         
@@ -75,6 +96,4 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
         Ok((result.records, result.next_shard_iterator))
     }
 
-
-    
 }
