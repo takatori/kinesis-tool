@@ -1,4 +1,6 @@
 extern crate rustbox;
+extern crate rustc_serialize;
+extern crate flate2;
 
 use rusoto::{
     DefaultCredentialsProvider,
@@ -10,6 +12,11 @@ use hyper::Client;
 use self::rustbox::Key;
 use super::kinesis::KinesisHelper;
 use super::screen::Screen;
+use self::rustc_serialize::base64::{FromBase64, STANDARD};
+
+
+use std::io::prelude::*;
+use self::flate2::read::GzDecoder;
 
 
 enum State {
@@ -87,8 +94,14 @@ impl Controller {
                 State::RecordList(shard_iterator, records) => {
 
                     if records.len() != 0 {
+                        let mut d = GzDecoder::new(&records[0].data[..]).unwrap();
+                        let mut s = String::new();
+                        d.read_to_string(&mut s).unwrap();
+                        println!("{}", s);                        
                         // println!("{:?}", records[0].data);
-                        println!("{:?}", String::from_utf8_lossy(&records[0].data));                        
+                        // println!("{:?}", str::from_utf8(&records[0].data));
+                        // println!("{:?}", records[0].data.from_base64());
+                        // println!("{:?}", String::from_utf8_lossy(&records[0].data));                        
                     }
 
                     // let a = kinesis_helper.convert(&records[0]);
