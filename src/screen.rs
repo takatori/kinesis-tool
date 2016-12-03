@@ -1,8 +1,23 @@
 extern crate rustbox;
 
-use std::iter;
 use std::error::Error;
 use self::rustbox::{Color, RustBox, Key};
+
+trait PrintLine {
+    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
+}
+
+impl PrintLine for RustBox {
+    
+    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color) {
+        for x in 0..(self.width()) {
+            let ch = item.chars().nth(x).unwrap_or(' ');
+            self.print_char(x, y, rustbox::RB_NORMAL, fg, bg, ch);
+        }
+    }
+}
+
+
 
 pub struct Screen {
     rustbox: RustBox
@@ -20,28 +35,21 @@ impl Screen {
     }
 
     pub fn draw_help(&self) {
-
         self.rustbox.clear();
-        
-        let width = self.rustbox.width();
-        let dummy_str = iter::repeat(" ").take(width).collect::<String>();
-        
-        self.rustbox.clear();
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::White, Color::Black, &dummy_str);
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::White, Color::Black, "> Hello!");
-        self.rustbox.print(0, 1, rustbox::RB_BOLD, Color::White, Color::Default, "> Press 'q' to quit.");
-        self.rustbox.print(0, 2, rustbox::RB_BOLD, Color::White, Color::Default, "> Press 'l' to show kinesis streams.");
+        self.rustbox.print_line(0, "☰ Hello! this is kinesis helper tool.", Color::Black, Color::Green);
+        self.rustbox.print_line(1, "☰ Press 'l' to show kinesis streams.", Color::Blue, Color::Black);                
+        self.rustbox.print_line(2, "☰ Press 'q' to quit.", Color::Blue, Color::Black);
         self.rustbox.present();        
     }    
 
     pub fn draw_strem_names(&self, stream_names: &Vec<String>) {
         
         self.rustbox.clear();
-        
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Stream List");
+
+        self.rustbox.print_line(0, "☰ Kinesis > Streams", Color::Black, Color::Green);        
         
         for (num, stream_name) in stream_names.iter().enumerate() {
-            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &stream_name));
+            self.rustbox.print_line(num + 1, &format!("☰ [{0}]: {1}", num, &stream_name), Color::Blue, Color::Black);                    
         }
 
         self.rustbox.present();        
@@ -50,11 +58,11 @@ impl Screen {
     pub fn draw_shards(&self, shards: &Vec<String>) {
 
         self.rustbox.clear();
-        
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Shard List");
+
+        self.rustbox.print_line(0, "☰ Kinesis > Streams > Shards", Color::Black, Color::Green);                
 
         for (num, shards) in shards.iter().enumerate() {
-            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &shards));
+            self.rustbox.print_line(num + 1, &format!("☰ [{0}]: {1}", num, &shards), Color::Blue, Color::Black);                                
         }        
 
         self.rustbox.present();                
@@ -64,10 +72,10 @@ impl Screen {
         
         self.rustbox.clear();
         
-        self.rustbox.print(0, 0, rustbox::RB_BOLD, Color::Green, Color::Black, "Kinesis Record List");
+        self.rustbox.print_line(0, "☰ Kinesis > Streams > Shards > Records", Color::Black, Color::Green);                
 
         for (num, record) in records.iter().enumerate() {
-            self.rustbox.print(0, num + 1, rustbox::RB_BOLD, Color::White, Color::Black, &format!("[{0}]: {1}", num, &record));
+            self.rustbox.print_line(num + 1, &format!("☰ [{0}]: {1}", num, &record), Color::Blue, Color::Black);                                            
         }        
 
         self.rustbox.present();                        
