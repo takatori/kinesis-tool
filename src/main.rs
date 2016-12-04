@@ -9,7 +9,7 @@ use controller::Controller;
 
 fn main() {
     
-    let controller = Controller::new();
+    let mut controller = Controller::new();
     controller.run();
     
 }
