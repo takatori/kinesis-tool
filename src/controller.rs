@@ -66,8 +66,8 @@ impl Controller {
                 },
                 State::StreamList(streams) => {
 
-                    self.screen.draw_strem_names(&streams);
-
+                    self.screen.update_lines(&streams);
+                    
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
                         Status::Selected(i) => {
@@ -82,7 +82,7 @@ impl Controller {
                 },
                 State::ShardList(stream_name, shards) => {
                     
-                    self.screen.draw_shards(&shards);
+                    self.screen.update_lines(&shards);
 
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,

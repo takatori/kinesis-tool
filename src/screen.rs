@@ -60,10 +60,16 @@ impl Screen {
         }
     }
 
+    pub fn update_lines(&mut self, lines: &Vec<String>) {
+        self.lines = lines.to_owned()
+    }
+
 
     pub fn select_line(&mut self) -> Status {
         
         loop {
+            
+            self.render_items();
             
             match self.rustbox.poll_event(false) {
                 
@@ -95,11 +101,11 @@ impl Screen {
                 Ok(Status::Selected(self.cursor))
             },
             KeyEvent(Key::Esc) => Ok(Status::Escaped),
-            KeyEvent(Key::Up) => {
+            KeyEvent(Key::Up) | KeyEvent(Key::Ctrl('p')) => {
                 self.cursor_up();
                 Ok(Status::Continue)
             },
-            KeyEvent(Key::Down) => {
+            KeyEvent(Key::Down) | KeyEvent(Key::Ctrl('n')) => {
                 self.cursor_down();
                 Ok(Status::Continue)
             },
@@ -122,8 +128,21 @@ impl Screen {
         self.cursor += 1;  // displayのサイズを考慮する必要がある
     }
 
-
     
+    fn render_items(&self) {
+        
+        self.rustbox.clear();
+        
+        for(y, item) in self.lines.iter().enumerate() {
+            if y == self.cursor {
+                self.rustbox.print_line(y, &format!("[{0}]: {1}", y, &item), Color::Black, Color::Green);                                                            
+            } else {
+                self.rustbox.print_line(y, &format!("[{0}]: {1}", y, &item), Color::Blue, Color::Black);                                                            
+            }
+        }
+        
+        self.rustbox.present();                
+    }
 
     pub fn draw_help(&self) {
         self.rustbox.clear();
@@ -131,7 +150,8 @@ impl Screen {
         self.rustbox.print_line(1, "☰ Press 'l' to show kinesis streams.", Color::Blue, Color::Black);                
         self.rustbox.print_line(2, "☰ Press 'q' to quit.", Color::Blue, Color::Black);
         self.rustbox.present();        
-    }    
+    }
+    
 
     pub fn draw_strem_names(&self, stream_names: &Vec<String>) {
         
@@ -139,11 +159,7 @@ impl Screen {
 
         self.rustbox.print_line(0, "☰ Kinesis > Streams", Color::Black, Color::Green);        
         
-        for (num, stream_name) in stream_names.iter().enumerate() {
-            self.rustbox.print_line(num + 1, &format!("[{0}]: {1}", num, &stream_name), Color::Blue, Color::Black);                    
-        }
-
-        self.rustbox.present();        
+        self.rustbox.present();                
     }
 
     pub fn draw_shards(&self, shards: &Vec<String>) {
