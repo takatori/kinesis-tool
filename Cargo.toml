@@ -1,7 +1,7 @@
 [package]
-name = "kinesis-tool"
+name = "rawst"
 version = "0.1.0"
-authors = ["takatori <takatorisatoshi@team-lab.com>"]
+authors = ["takatori <takatorix@gmail.com>"]
 
 [dependencies]
 rusoto = {version = "0.17", features = ["kinesis"]}
