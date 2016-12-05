@@ -1,6 +1,6 @@
-# kinesis-tool
+# Rawst
 
-text-mode interface for Kinesis
+text-mode interface for AWS
 
 
 ## Feature
