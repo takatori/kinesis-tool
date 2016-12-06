@@ -5,6 +5,7 @@ authors = ["takatori <takatorix@gmail.com>"]
 
 [dependencies]
 rusoto = {version = "0.17", features = ["kinesis"]}
+rusoto  = {version = "0.20", features = ["kinesis"]}
 rustbox = "*"
 hyper = "*"
 flate2 = "0.2"
