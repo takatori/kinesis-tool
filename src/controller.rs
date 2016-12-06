@@ -1,6 +1,6 @@
 extern crate rustbox;
 
-use self::rustbox::{RustBox, Key};
+use self::rustbox::Key;
 
 
 use rusoto::{
@@ -48,31 +48,30 @@ impl Controller {
             state = match state {
                 
                 State::Root => {
-                    
-                    self.screen.draw_help();
 
-                    match self.screen.poll_event() {
-                        Key::Char('q') => State::End,
-                        Key::Char('l') => {
+                    let commands = vec!["l".to_string(), "q".to_string()];
+                    self.screen.update_screen("☰ l: show kinesis streams, q: quit", &commands);
+
+                    match self.screen.select_line() {
+                        Status::Error | Status::Quit => State::End,
+                        Status::Selected(ref c) if c == "l" => {
                             match kinesis_helper.list_streams() {
                                 Ok(streams) => State::StreamList(streams),
                                 Err(e) =>  State::Root
                             }
-                        },
+                        }
                         _ => State::Root
-                            
                     }                    
-                    
                 },
                 State::StreamList(streams) => {
 
-                    self.screen.update_lines(&streams);
-                    
+                    self.screen.update_screen("☰ Kinesis > Streams", &streams);
+
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
-                        Status::Selected(i) => {
-                            let ref stream_name = streams[i];
-                            match kinesis_helper.describe_shards(stream_name) {
+                        Status::Selected(stream_name) => {
+                            println!("{:?}", &stream_name);                            
+                            match kinesis_helper.describe_shards(&stream_name) {
                                 Ok(shards) => State::ShardList(stream_name.to_string(), shards),
                                 Err(e) => State::Root,
                             } 
@@ -82,13 +81,12 @@ impl Controller {
                 },
                 State::ShardList(stream_name, shards) => {
                     
-                    self.screen.update_lines(&shards);
+                    self.screen.update_screen("☰ Kinesis > Streams > Shards", &shards);
 
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
-                        Status::Selected(i) => {
-                            let ref shard_id = shards[i];
-                            match kinesis_helper.get_shard_iterator(&stream_name, shard_id) {
+                        Status::Selected(shard_id) => {
+                            match kinesis_helper.get_shard_iterator(&stream_name, &shard_id) {
                                 Ok(shard_iterator) => State::RecordList(shard_iterator, vec!()),
                                 Err(e) => State::Root,
                             }

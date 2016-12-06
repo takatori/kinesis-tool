@@ -7,11 +7,11 @@ use self::rustbox::Event::KeyEvent;
 use self::regex::Regex;
 
 
-// Error処理
+// Error 
 
 // Screen Status
 pub enum Status {
-    Selected(usize),
+    Selected(String),
     Escaped,
     Continue,
     Quit,
@@ -34,9 +34,10 @@ impl PrintLine for RustBox {
 
 
 pub struct Screen {
-    lines: Vec<String>, // フィールドレベルのミュータビリティ    
+    nav: String,
+    lines: Vec<String>, 
     prompt: String,
-    // y_offset: usize,
+    y_offset: usize,
     filtered: Vec<String>,
     query: String,
     cursor: usize,
@@ -54,10 +55,11 @@ impl Screen {
         };
 
         Screen {
+            nav: String::new(),
             lines: vec!(),
             filtered: vec!(),
-            prompt: "☰ >".to_owned(),
-            // y_offset: 1,
+            prompt: "☰ ".to_owned(),
+            y_offset: 2,
             query: String::new(),
             cursor: 0,
             // offset: 0,
@@ -65,8 +67,9 @@ impl Screen {
         }
     }
 
-    pub fn update_lines(&mut self, lines: &Vec<String>) {
+    pub fn update_screen(&mut self, nav: &str, lines: &Vec<String>) {
         self.cursor = 0;
+        self.nav = nav.to_string();
         self.lines = lines.to_owned();
         self.filtered = self.lines.clone();
     }
@@ -105,7 +108,7 @@ impl Screen {
         
         match event {
             KeyEvent(Key::Enter) => {
-                Ok(Status::Selected(self.cursor))
+                Ok(Status::Selected(self.filtered[self.cursor + self.y_offset].to_owned()))
             },
             KeyEvent(Key::Esc) => Ok(Status::Escaped),
             KeyEvent(Key::Up) | KeyEvent(Key::Ctrl('p')) => {
@@ -173,60 +176,32 @@ impl Screen {
         
         for(y, item) in self.filtered.iter().enumerate() {
             if y == self.cursor {
-                self.rustbox.print_line(y+1, &format!("[{0}]: {1}", y, &item), Color::Black, Color::Green);
+                self.rustbox.print_line(y + self.y_offset, &format!("[{0}]: {1}", y, &item), Color::Black, Color::Green);
             } else {
-                self.rustbox.print_line(y+1, &format!("[{0}]: {1}", y, &item), Color::Blue, Color::Black);
+                self.rustbox.print_line(y + self.y_offset, &format!("[{0}]: {1}", y, &item), Color::Blue, Color::Black);
             }
         }
+
+        self.rustbox.print_line(0, &self.nav, Color::White, Color::Black);            
         
         // print query line and move the cursor to end.
         let query_str = format!("{}{}", self.prompt, self.query);
-        self.rustbox.print_line(0, &query_str, Color::White, Color::Black);
+        self.rustbox.print_line(1, &query_str, Color::White, Color::Black);
         self.rustbox.set_cursor(query_str.len() as isize, 0);
         
         self.rustbox.present();                
     }
 
-    pub fn draw_help(&self) {
-        self.rustbox.clear();
-        self.rustbox.print_line(0, "☰ Hello! this is kinesis helper tool.", Color::Black, Color::Green);
-        self.rustbox.print_line(1, "☰ Press 'l' to show kinesis streams.", Color::Blue, Color::Black);                
-        self.rustbox.print_line(2, "☰ Press 'q' to quit.", Color::Blue, Color::Black);
-        self.rustbox.present();        
-    }
     
-
-    pub fn draw_strem_names(&self, stream_names: &Vec<String>) {
-        
-        self.rustbox.clear();
-
-        self.rustbox.print_line(0, "☰ Kinesis > Streams", Color::Black, Color::Green);        
-        
-        self.rustbox.present();                
-    }
-
-    pub fn draw_shards(&self, shards: &Vec<String>) {
-
-        self.rustbox.clear();
-
-        self.rustbox.print_line(0, "☰ Kinesis > Streams > Shards", Color::Black, Color::Green);                
-
-        for (num, shards) in shards.iter().enumerate() {
-            self.rustbox.print_line(num + 1, &format!("[{0}]: {1}", num, &shards), Color::Blue, Color::Black);                                
-        }        
-
-        self.rustbox.present();                
-    }
-
     pub fn draw_records(&self, records: &Vec<String>) {
         
         self.rustbox.clear();
         
-        self.rustbox.print_line(0, "☰ Kinesis > Streams > Shards > Records", Color::Black, Color::Green);
-        self.rustbox.print_line(1, "☰ Press 'n' to next page.", Color::Black, Color::Green);                        
+        self.rustbox.print_line(1, "☰ Kinesis > Streams > Shards > Records", Color::Black, Color::Green);
+        self.rustbox.print_line(2, "☰ Press 'n' to next page.", Color::Black, Color::Green);                        
 
         for (num, record) in records.iter().enumerate() {
-            self.rustbox.print_line(num + 2, &format!("[{0}]: {1}", num, &record), Color::Blue, Color::Black);                                            
+            self.rustbox.print_line(num + 3, &format!("[{0}]: {1}", num, &record), Color::Blue, Color::Black);                                            
         }        
 
         self.rustbox.present();                        
