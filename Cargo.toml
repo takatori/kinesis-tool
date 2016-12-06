@@ -4,9 +4,8 @@ version = "0.1.0"
 authors = ["takatori <takatorix@gmail.com>"]
 
 [dependencies]
-rusoto = {version = "0.17", features = ["kinesis"]}
 rusoto  = {version = "0.20", features = ["kinesis"]}
 rustbox = "*"
-hyper = "*"
-flate2 = "0.2"
+hyper   = "*"
+flate2  = "0.2"
 regex   = "0.1"
