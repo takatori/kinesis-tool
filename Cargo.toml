@@ -8,3 +8,4 @@ rusoto = {version = "0.17", features = ["kinesis"]}
 rustbox = "*"
 hyper = "*"
 flate2 = "0.2"
+regex   = "0.1"
