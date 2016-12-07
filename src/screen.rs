@@ -187,8 +187,7 @@ impl Screen {
         // print query line and move the cursor to end.
         let query_str = format!("{}{}", self.prompt, self.query);
         self.rustbox.print_line(1, &query_str, Color::White, Color::Black);
-        self.rustbox.set_cursor(query_str.len() as isize, 0);
-        
+        self.rustbox.set_cursor(query_str.len() as isize - 1, 1);
         self.rustbox.present();                
     }
 

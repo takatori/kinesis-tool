@@ -70,7 +70,6 @@ impl Controller {
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
                         Status::Selected(stream_name) => {
-                            println!("{:?}", &stream_name);                            
                             match kinesis_helper.describe_shards(&stream_name) {
                                 Ok(shards) => State::ShardList(stream_name.to_string(), shards),
                                 Err(e) => State::Root,
