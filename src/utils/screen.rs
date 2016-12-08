@@ -72,6 +72,18 @@ impl Screen {
         self.filtered = self.lines.clone();
     }
 
+    pub fn render(&self, item: &str) -> Status {
+        
+        self.rustbox.clear();
+        self.rustbox.print_line(0, &format!("{0}", item), Color::Blue, Color::Black);
+        self.rustbox.present();
+
+        match self.rustbox.poll_event(false) {
+            Ok(KeyEvent(Key::Char('q'))) => Status::Quit,
+            _ => Status::Escaped
+        }
+    }
+    
 
     pub fn select_line(&mut self) -> Status {
         
@@ -80,7 +92,6 @@ impl Screen {
             self.render_items();
             
             match self.rustbox.poll_event(false) {
-                
                 Err(err) => panic!("{:?}", err),
                 Ok(event) => match self.handle_event(event) {
                     Ok(Status::Selected(s)) => return Status::Selected(s),
@@ -90,16 +101,6 @@ impl Screen {
             }
         }
     }
-
-    
-    pub fn poll_event(&self) -> Key {
-        match self.rustbox.poll_event(false) {
-            Ok(rustbox::Event::KeyEvent(key)) => key,
-            Err(e) => panic!("{}", e.description()),
-            _ => panic!("error")
-        }
-    }    
-
     
 
     fn handle_event(&mut self, event: rustbox::Event) -> Result<Status, Box<Error>> {
@@ -185,22 +186,6 @@ impl Screen {
         self.rustbox.set_cursor(query_str.len() as isize, 0);
         self.rustbox.present();                
     }
-
-    
-    pub fn draw_records(&self, records: &Vec<String>) {
-        
-        self.rustbox.clear();
-        
-        self.rustbox.print_line(1, "☰ Kinesis > Streams > Shards > Records", Color::Black, Color::Green);
-        self.rustbox.print_line(2, "☰ Press 'n' to next page.", Color::Black, Color::Green);                        
-
-        for (num, record) in records.iter().enumerate() {
-            self.rustbox.print_line(num + 3, &format!("[{0}]: {1}", num, &record), Color::Blue, Color::Black);                                            
-        }        
-
-        self.rustbox.present();                        
-    }
-
     
 }
 

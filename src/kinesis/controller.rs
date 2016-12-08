@@ -1,18 +1,13 @@
-extern crate rustbox;
-
-use self::rustbox::Key;
-
+use hyper::Client;
+use super::helper::KinesisHelper;
+use utils::screen::Screen;
+use utils::screen::Status;
 
 use rusoto::{
     DefaultCredentialsProvider,
     Region
 };
 
-use rusoto::kinesis::Record;
-use hyper::Client;
-use super::kinesis::KinesisHelper;
-use super::screen::Screen;
-use super::screen::Status;
 
 enum State {
     Root,
@@ -120,11 +115,9 @@ impl Controller {
                 },
                 State::Record(shard_iterator, record) => {
 
-                    self.screen.update_screen(&vec![record]);
-
-                    match self.screen.select_line() {
+                    match self.screen.render(&record) {
                         Status::Error | Status::Quit => State::End,
-                        Status::Selected(ref c) if c == "b"  => State::RecordList(shard_iterator),
+                        Status::Escaped  => State::RecordList(shard_iterator),
                         _ => State::Root
                     }                                                            
                 }

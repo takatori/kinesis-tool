@@ -1,11 +1,7 @@
-extern crate rusoto;
-extern crate flate2;
-
 use std::default::Default;
 use std::error::Error;
-
 use std::io::prelude::*;
-use self::flate2::read::GzDecoder;
+use flate2::read::GzDecoder;
     
 use rusoto::{
     ProvideAwsCredentials,
