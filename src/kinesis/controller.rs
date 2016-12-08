@@ -18,9 +18,9 @@ enum State {
 }
 
 
-pub fn run(credential_provider: DefaultCredentialsProvider, client: Client) {
+pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, region: Region) {
     
-    let kinesis_helper = KinesisHelper::new(client, credential_provider, Region::ApNortheast1);
+    let kinesis_helper = KinesisHelper::new(client, credential_provider, region);
     let mut screen: Screen = Screen::new();
     let mut state: State = State::Root; 
     
