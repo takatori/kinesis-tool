@@ -2,12 +2,19 @@ extern crate rusoto;
 extern crate hyper;
 extern crate flate2;
 
-pub mod kinesis;
-pub mod utils;
+mod kinesis;
+mod utils;
 
-use kinesis::controller::Controller;
+use hyper::Client;
+use rusoto::{
+    DefaultCredentialsProvider,
+    Region
+};
+
+use kinesis::controller;
 
 pub fn run() {
-    let mut controller = Controller::new();
-    controller.run();
+    let credential_provider = DefaultCredentialsProvider::new().unwrap();
+    let client              = Client::new();        
+    controller::run(credential_provider, client);
 }
