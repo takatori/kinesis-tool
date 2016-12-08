@@ -34,7 +34,6 @@ impl PrintLine for RustBox {
 
 
 pub struct Screen {
-    nav: String,
     lines: Vec<String>, 
     prompt: String,
     y_offset: usize,
@@ -55,11 +54,10 @@ impl Screen {
         };
 
         Screen {
-            nav: String::new(),
             lines: vec!(),
             filtered: vec!(),
-            prompt: "☰ ".to_owned(),
-            y_offset: 2,
+            prompt: "> ".to_owned(),
+            y_offset: 1,
             query: String::new(),
             cursor: 0,
             // offset: 0,
@@ -67,9 +65,9 @@ impl Screen {
         }
     }
 
-    pub fn update_screen(&mut self, nav: &str, lines: &Vec<String>) {
+    pub fn update_screen(&mut self, lines: &Vec<String>) {
         self.cursor = 0;
-        self.nav = nav.to_string();
+        self.query = String::new();
         self.lines = lines.to_owned();
         self.filtered = self.lines.clone();
     }
@@ -108,7 +106,7 @@ impl Screen {
         
         match event {
             KeyEvent(Key::Enter) => {
-                Ok(Status::Selected(self.filtered[self.cursor + self.y_offset].to_owned()))
+                Ok(Status::Selected(self.filtered[self.cursor].to_owned()))
             },
             KeyEvent(Key::Esc) => Ok(Status::Escaped),
             KeyEvent(Key::Up) | KeyEvent(Key::Ctrl('p')) => {
@@ -154,7 +152,6 @@ impl Screen {
         };
 
         self.cursor = 0;
-        // self.offset = 0;
 
         Ok(())
     }    
@@ -182,12 +179,10 @@ impl Screen {
             }
         }
 
-        self.rustbox.print_line(0, &self.nav, Color::White, Color::Black);            
-        
         // print query line and move the cursor to end.
         let query_str = format!("{}{}", self.prompt, self.query);
-        self.rustbox.print_line(1, &query_str, Color::White, Color::Black);
-        self.rustbox.set_cursor(query_str.len() as isize - 1, 1);
+        self.rustbox.print_line(0, &query_str, Color::Green, Color::Black);
+        self.rustbox.set_cursor(query_str.len() as isize, 0);
         self.rustbox.present();                
     }
 

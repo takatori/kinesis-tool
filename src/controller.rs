@@ -19,7 +19,8 @@ enum State {
     End,
     StreamList(Vec<String>),
     ShardList(String, Vec<String>), 
-    RecordList(String, Vec<Record>),  // stream_name, iterator_id
+    RecordList(String),  // iterator_id, records
+    Record(String, String), // itrator_id, record
 }
     
 pub struct Controller {
@@ -49,12 +50,12 @@ impl Controller {
                 
                 State::Root => {
 
-                    let commands = vec!["l".to_string(), "q".to_string()];
-                    self.screen.update_screen("☰ l: show kinesis streams, q: quit", &commands);
+                    let commands = vec!["list streams".to_string(), "quit".to_string()];
+                    self.screen.update_screen(&commands);
 
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
-                        Status::Selected(ref c) if c == "l" => {
+                        Status::Selected(ref c) if c == "list streams" => {
                             match kinesis_helper.list_streams() {
                                 Ok(streams) => State::StreamList(streams),
                                 Err(e) =>  State::Root
@@ -65,7 +66,7 @@ impl Controller {
                 },
                 State::StreamList(streams) => {
 
-                    self.screen.update_screen("☰ Kinesis > Streams", &streams);
+                    self.screen.update_screen(&streams);
 
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
@@ -80,13 +81,13 @@ impl Controller {
                 },
                 State::ShardList(stream_name, shards) => {
                     
-                    self.screen.update_screen("☰ Kinesis > Streams > Shards", &shards);
+                    self.screen.update_screen(&shards);
 
                     match self.screen.select_line() {
                         Status::Error | Status::Quit => State::End,
                         Status::Selected(shard_id) => {
                             match kinesis_helper.get_shard_iterator(&stream_name, &shard_id) {
-                                Ok(shard_iterator) => State::RecordList(shard_iterator, vec!()),
+                                Ok(shard_iterator) => State::RecordList(shard_iterator),
                                 Err(e) => State::Root,
                             }
                         }
@@ -94,35 +95,39 @@ impl Controller {
                     }                    
 
                 },
-                State::RecordList(shard_iterator, records) => {
+                State::RecordList(shard_iterator) => {
 
                     match kinesis_helper.get_records(&shard_iterator) {
-                        Ok((r, i)) => {
+                        
+                        Ok((results, iterator)) => {
 
-                            if r.len() != 0 {
-                                self.screen.draw_records(&kinesis_helper.decode_records(&r))
-                            }
+                            self.screen.update_screen(&kinesis_helper.decode_records(&results));
                             
-                            match i {
-                                Some(i) => {
-                                    match self.screen.poll_event() {                                        
-                                        Key::Char('n') => State::RecordList(i, r),
-                                        Key::Char('q') => State::End,
-                                        _ => State::Root
+                            match self.screen.select_line() {
+                                Status::Error | Status::Quit => State::End,
+                                Status::Selected(ref c) if c == "n" => {
+                                    match iterator {
+                                        Some(iterator) => State::RecordList(iterator),
+                                        None => State::Root
                                     }
                                 },
-                                None => {
-                                    match self.screen.poll_event() {
-                                        Key::Char('q') => State::End,
-                                        _ => State::Root
-                                    }
-                                }
+                                Status::Selected(ref record) => State::Record(shard_iterator, record.to_string()),
+                                _ => State::Root
                             }
                         },
                         Err(e) => State::Root,
                     }
-                    
                 },
+                State::Record(shard_iterator, record) => {
+
+                    self.screen.update_screen(&vec![record]);
+
+                    match self.screen.select_line() {
+                        Status::Error | Status::Quit => State::End,
+                        Status::Selected(ref c) if c == "b"  => State::RecordList(shard_iterator),
+                        _ => State::Root
+                    }                                                            
+                }
                 State::End => {
                     break;
                 }
