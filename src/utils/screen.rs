@@ -1,6 +1,7 @@
 extern crate rustbox;
 extern crate regex;
 
+use std::cmp::min;
 use std::error::Error;
 use self::rustbox::{Color, RustBox, Key};
 use self::rustbox::Event::KeyEvent;
@@ -164,7 +165,15 @@ impl Screen {
 
     fn cursor_down(&mut self) {
         
-        self.cursor += 1;  // displayのサイズを考慮する必要がある
+        let height = self.rustbox.height();
+        
+        self.cursor = min(
+            (self.cursor + 1),
+            min(
+                (self.filtered.len() - 1),
+                (height - 1)
+            )
+        );
     }
 
     
