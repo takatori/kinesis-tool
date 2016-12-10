@@ -1,15 +1,3 @@
 # Rawst
 
-text-mode interface for AWS
-
-
-## Feature
-
-
-## Usage
-
-
-## Requirement
-
-
-
+The interactive tool for AWS CLI written in Rust

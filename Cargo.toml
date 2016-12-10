@@ -2,10 +2,16 @@
 name = "rawst"
 version = "0.1.0"
 authors = ["takatori <takatorix@gmail.com>"]
+description = "The interactive tool for AWS CLI written in Rust"
+repository = "https://github.com/takatori/rawst"
+readme = "README.md"
+license-file = "LICENSE"
+keywords = ["rawst", "aws"]
 
 [dependencies]
-rusoto  = {version = "0.20", features = ["kinesis"]}
-rustbox = "*"
-hyper   = "*"
-flate2  = "0.2"
-regex   = "0.1"
+rusoto    = {version = "0.20", features = ["kinesis"]}
+rustbox   = "*"
+hyper     = "*"
+flate2    = "0.2"
+regex     = "0.1"
+json_flex = "*"
