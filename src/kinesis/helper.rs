@@ -18,8 +18,8 @@ use rusoto::kinesis::{
     Record,
 };
 
-use json_flex;
-use json_flex::{JFObject, Unwrap};
+use serde_json;
+use serde_json::Value;
 
 pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
     client: KinesisClient<P, D>,
@@ -34,8 +34,9 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
     }
 
     pub fn format_record(&self, record: &str) -> String {
-        let json = json_flex::decode(record.to_owned());
-        json.to_json()
+
+        let data: Value = serde_json::from_str(record).unwrap();        
+        serde_json::to_string_pretty(&data).unwrap()
     }
     
     pub fn decode_records(&self, records: &[Record]) -> Vec<String> {
