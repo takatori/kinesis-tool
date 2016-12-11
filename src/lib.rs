@@ -1,6 +1,7 @@
 extern crate rusoto;
 extern crate hyper;
 extern crate flate2;
+extern crate json_flex;
 
 mod kinesis;
 mod utils;

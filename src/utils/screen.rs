@@ -76,7 +76,11 @@ impl Screen {
     pub fn render(&self, item: &str) -> Status {
         
         self.rustbox.clear();
-        self.rustbox.print_line(0, &format!("{0}", item), Color::Blue, Color::Black);
+
+        for(n, line) in item.split("\n").enumerate() {
+            self.rustbox.print_line(n, &format!("{0}", line), Color::Blue, Color::Black);
+        }
+        
         self.rustbox.present();
 
         match self.rustbox.poll_event(false) {

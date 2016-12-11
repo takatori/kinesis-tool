@@ -18,11 +18,13 @@ use rusoto::kinesis::{
     Record,
 };
 
-
+use json_flex;
+use json_flex::{JFObject, Unwrap};
 
 pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
     client: KinesisClient<P, D>,
 }
+
 
 impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
     
@@ -31,12 +33,17 @@ impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSigned
         KinesisHelper { client: KinesisClient::with_request_dispatcher(request_dispatcher, credentials_provider, region) }
     }
 
+    pub fn format_record(&self, record: &str) -> String {
+        let json = json_flex::decode(record.to_owned());
+        json.to_json()
+    }
+    
     pub fn decode_records(&self, records: &[Record]) -> Vec<String> {
         records.iter().map(|record| self.decode(&record)).collect::<Vec<String>>()
     }
 
 
-    pub fn decode(&self, record: &Record) -> String {
+    fn decode(&self, record: &Record) -> String {
         
         let mut d = GzDecoder::new(&record.data[..]).unwrap();
         let mut s = String::new();

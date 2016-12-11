@@ -99,8 +99,8 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
                 }
             },
             State::Record(shard_iterator, record) => {
-
-                match screen.render(&record) {
+                
+                match screen.render(&kinesis_helper.format_record(&record)) {
                     Status::Error | Status::Quit => State::End,
                     Status::Escaped  => State::RecordList(shard_iterator),
                     _ => State::Root

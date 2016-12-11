@@ -10,8 +10,8 @@ keywords = ["rawst", "aws"]
 
 [dependencies]
 rusoto    = {version = "0.20", features = ["kinesis"]}
-rustbox   = "*"
-hyper     = "*"
+rustbox   = "0.9"
+hyper     = "0.9"
 flate2    = "0.2"
 regex     = "0.1"
-json_flex = "*"
+json_flex = "0.3"
