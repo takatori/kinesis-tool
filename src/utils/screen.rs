@@ -21,6 +21,7 @@ pub enum Status {
 
 trait PrintLine {
     fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
+    fn print_lines(&self, item: &str, fg: Color, bg: Color);
 }
 
 impl PrintLine for RustBox {
@@ -31,18 +32,26 @@ impl PrintLine for RustBox {
             self.print_char(x, y, rustbox::RB_NORMAL, fg, bg, ch);
         }
     }
+
+    fn print_lines(&self, item: &str, fg: Color, bg: Color) {
+        
+        for(n, line) in item.split("\n").enumerate() {
+            self.print_line(n, line, fg, bg);            
+        }
+    }
 }
 
 
 pub struct Screen {
-    lines: Vec<String>, 
-    prompt: String,
+    body:     String,
+    lines:    Vec<String>, 
+    prompt:   String,
+    // offset: usize,    
     y_offset: usize,
     filtered: Vec<String>,
-    query: String,
-    cursor: usize,
-    // offset: usize,
-    rustbox: RustBox
+    query:    String,
+    cursor:   usize,
+    rustbox:  RustBox
 }
 
 impl Screen {
@@ -55,9 +64,10 @@ impl Screen {
         };
 
         Screen {
+            body: String::new(),
             lines: vec!(),
             filtered: vec!(),
-            prompt: "> ".to_owned(),
+            prompt: "🍓  ".to_owned(),
             y_offset: 1,
             query: String::new(),
             cursor: 0,
@@ -66,7 +76,9 @@ impl Screen {
         }
     }
 
-    pub fn update_screen(&mut self, lines: &Vec<String>) {
+    pub fn update_screen(&mut self, body: &str, lines: &Vec<String>) {
+        self.y_offset = body.lines().count() + 1;
+        self.body = body.to_string();
         self.cursor = 0;
         self.query = String::new();
         self.lines = lines.to_owned();
@@ -77,13 +89,12 @@ impl Screen {
         
         self.rustbox.clear();
 
-        for(n, line) in item.split("\n").enumerate() {
-            self.rustbox.print_line(n, &format!("{0}", line), Color::Blue, Color::Black);
-        }
+        self.rustbox.print_lines(item, Color::Blue, Color::Black);        
         
         self.rustbox.present();
 
         match self.rustbox.poll_event(false) {
+
             Ok(KeyEvent(Key::Char('q'))) => Status::Quit,
             _ => Status::Escaped
         }
@@ -111,23 +122,21 @@ impl Screen {
     fn handle_event(&mut self, event: rustbox::Event) -> Result<Status, Box<Error>> {
         
         match event {
-            KeyEvent(Key::Enter) => {
-                Ok(Status::Selected(self.filtered[self.cursor].to_owned()))
-            },
-            KeyEvent(Key::Esc) => Ok(Status::Escaped),
-            KeyEvent(Key::Up) | KeyEvent(Key::Ctrl('p')) => {
+            KeyEvent(Key::Enter)     => Ok(Status::Selected(self.filtered[self.cursor].to_owned())),
+            KeyEvent(Key::Esc)       => Ok(Status::Escaped),
+            KeyEvent(Key::Char('q')) => Ok(Status::Quit),
+            KeyEvent(Key::Char(c))   => self.append_query(c).and(Ok(Status::Continue)),            
+            KeyEvent(Key::Backspace) => self.remove_query().and(Ok(Status::Continue)),
+            KeyEvent(Key::Up) |
+            KeyEvent(Key::Ctrl('p')) => {
                 self.cursor_up();
                 Ok(Status::Continue)
             },
-            KeyEvent(Key::Down) | KeyEvent(Key::Ctrl('n')) => {
+            KeyEvent(Key::Down) |
+            KeyEvent(Key::Ctrl('n')) => {
                 self.cursor_down();
                 Ok(Status::Continue)
             },
-            KeyEvent(Key::Char('q')) => {
-                Ok(Status::Quit)
-            },            
-            KeyEvent(Key::Backspace) => self.remove_query().and(Ok(Status::Continue)),
-            KeyEvent(Key::Char(c)) => self.append_query(c).and(Ok(Status::Continue)),
             _ => Ok(Status::Continue),            
         }
     }
@@ -195,8 +204,8 @@ impl Screen {
 
         // print query line and move the cursor to end.
         let query_str = format!("{}{}", self.prompt, self.query);
-        self.rustbox.print_line(0, &query_str, Color::Green, Color::Black);
-        self.rustbox.set_cursor(query_str.len() as isize, 0);
+        self.rustbox.print_lines(&self.body, Color::Green, Color::Black);
+        self.rustbox.print_line(self.y_offset - 1, &query_str, Color::Blue, Color::Black);
         self.rustbox.present();                
     }
     

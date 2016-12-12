@@ -30,12 +30,12 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             
             State::Root => {
 
-                let commands = vec!["list streams".to_string(), "quit".to_string()];
-                screen.update_screen(&commands);
+                let commands = vec!["l".to_string(), "q".to_string()];
+                screen.update_screen("Kinesis\n  l:list streams\n  q: quit", &commands);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
-                    Status::Selected(ref c) if c == "list streams" => {
+                    Status::Selected(ref c) if c == "l" => {
                         match kinesis_helper.list_streams() {
                             Ok(streams) => State::StreamList(streams),
                             Err(e) =>  State::Root
@@ -46,7 +46,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             },
             State::StreamList(streams) => {
 
-                screen.update_screen(&streams);
+                screen.update_screen("Kinesis > Streams", &streams);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
@@ -61,7 +61,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             },
             State::ShardList(stream_name, shards) => {
                 
-                screen.update_screen(&shards);
+                screen.update_screen("Kinesis > Streams > Shards", &shards);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
@@ -81,7 +81,8 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
                     
                     Ok((results, iterator)) => {
 
-                        screen.update_screen(&kinesis_helper.decode_records(&results));
+                        screen.update_screen("Kinesis > Streams > Shards > Records",
+                                             &kinesis_helper.decode_records(&results));
                         
                         match screen.select_line() {
                             Status::Error | Status::Quit => State::End,
