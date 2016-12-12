@@ -19,12 +19,12 @@ pub enum Status {
     Error,
 }
 
-trait PrintLine {
+trait Print {
     fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
     fn print_lines(&self, item: &str, fg: Color, bg: Color);
 }
 
-impl PrintLine for RustBox {
+impl Print for RustBox {
     
     fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color) {
         for x in 0..(self.width()) {
