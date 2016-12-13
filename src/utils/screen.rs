@@ -33,10 +33,26 @@ impl Print for RustBox {
         }
     }
 
+    
     fn print_lines(&self, item: &str, fg: Color, bg: Color) {
+
+        let mut cursor = 0;
         
-        for(n, line) in item.split("\n").enumerate() {
-            self.print_line(n, line, fg, bg);            
+        for line in item.split("\n") {
+            
+            // fold string if line lingth longer than window widht
+            if line.chars().count() > self.width() {
+                
+                let (first, last) = line.split_at(self.width());
+                self.print_line(cursor,    first, fg, bg);
+                self.print_line(cursor + 1, last, fg, bg);
+                cursor += 2;
+                continue;
+                
+            }
+            
+            self.print_line(cursor, line, fg, bg);
+            cursor += 1;
         }
     }
 }
