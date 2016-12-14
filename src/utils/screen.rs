@@ -210,7 +210,7 @@ impl Screen {
         
         self.rustbox.clear();
         
-        for(y, item) in self.filtered.iter().enumerate() {
+        for(y, item) in self.filtered.iter().take(&self.rustbox.height() - 1 - self.y_offset).enumerate() {
             if y == self.cursor {
                 self.rustbox.print_line(y + self.y_offset, &format!("[{0}]: {1}", y, &item), Color::Black, Color::Green);
             } else {
