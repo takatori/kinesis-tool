@@ -31,7 +31,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             State::Root => {
 
                 let commands = vec!["l".to_string(), "q".to_string()];
-                screen.update_screen("Kinesis\n  l:list streams\n  q: quit", &commands);
+                screen.update_screen("🍓  Kinesis", &commands);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
@@ -46,7 +46,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             },
             State::StreamList(streams) => {
 
-                screen.update_screen("Kinesis > Streams", &streams);
+                screen.update_screen("🍓  Kinesis > Streams", &streams);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
@@ -61,7 +61,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
             },
             State::ShardList(stream_name, shards) => {
                 
-                screen.update_screen("Kinesis > Streams > Shards", &shards);
+                screen.update_screen("🍓  Kinesis > Streams > Shards", &shards);
 
                 match screen.select_line() {
                     Status::Error | Status::Quit => State::End,
@@ -81,7 +81,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
                     
                     Ok((results, iterator)) => {
 
-                        screen.update_screen("Kinesis > Streams > Shards > Records",
+                        screen.update_screen("🍓  Kinesis > Streams > Shards > Records",
                                              &kinesis_helper.decode_records(&results));
                         
                         match screen.select_line() {
@@ -100,6 +100,8 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
                 }
             },
             State::Record(shard_iterator, record) => {
+
+                screen.update_screen("🍓  Kinesis > Streams > Shards > Records > Record", &vec!(String::new()));
                 
                 match screen.render(&kinesis_helper.format_record(&record)) {
                     Status::Error | Status::Quit => State::End,

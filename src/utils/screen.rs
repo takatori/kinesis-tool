@@ -21,7 +21,7 @@ pub enum Status {
 
 trait Print {
     fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
-    fn print_lines(&self, item: &str, fg: Color, bg: Color);
+    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color);
 }
 
 impl Print for RustBox {
@@ -34,9 +34,9 @@ impl Print for RustBox {
     }
 
     
-    fn print_lines(&self, item: &str, fg: Color, bg: Color) {
+    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color) {
 
-        let mut cursor = 0;
+        let mut cursor = start;
         
         for line in item.split("\n") {
             
@@ -59,7 +59,7 @@ impl Print for RustBox {
 
 
 pub struct Screen {
-    body:     String,
+    header:     String,
     lines:    Vec<String>, 
     prompt:   String,
     // offset: usize,    
@@ -80,7 +80,7 @@ impl Screen {
         };
 
         Screen {
-            body: String::new(),
+            header: String::new(),
             lines: vec!(),
             filtered: vec!(),
             prompt: "🍓  ".to_owned(),
@@ -92,9 +92,9 @@ impl Screen {
         }
     }
 
-    pub fn update_screen(&mut self, body: &str, lines: &Vec<String>) {
-        self.y_offset = body.lines().count() + 1;
-        self.body = body.to_string();
+    pub fn update_screen(&mut self, header: &str, lines: &Vec<String>) {
+        self.y_offset = header.lines().count() + 1;
+        self.header = header.to_string();
         self.cursor = 0;
         self.query = String::new();
         self.lines = lines.to_owned();
@@ -105,7 +105,8 @@ impl Screen {
         
         self.rustbox.clear();
 
-        self.rustbox.print_lines(item, Color::Blue, Color::Black);        
+        self.rustbox.print_lines(0, &self.header, Color::Green, Color::Black);
+        self.rustbox.print_lines(self.header.lines().count(), item, Color::Blue, Color::Black);        
         
         self.rustbox.present();
 
@@ -220,7 +221,7 @@ impl Screen {
 
         // print query line and move the cursor to end.
         let query_str = format!("{}{}", self.prompt, self.query);
-        self.rustbox.print_lines(&self.body, Color::Green, Color::Black);
+        self.rustbox.print_lines(0, &self.header, Color::Green, Color::Black);
         self.rustbox.print_line(self.y_offset - 1, &query_str, Color::Blue, Color::Black);
         self.rustbox.present();                
     }
