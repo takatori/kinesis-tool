@@ -94,10 +94,10 @@ impl Screen {
 
     pub fn update_screen(&mut self, header: &str, lines: &Vec<String>) {
         self.y_offset = header.lines().count() + 1;
-        self.header = header.to_string();
-        self.cursor = 0;
-        self.query = String::new();
-        self.lines = lines.to_owned();
+        self.header   = header.to_string();
+        self.cursor   = 0;
+        self.query    = String::new();
+        self.lines    = lines.to_owned();
         self.filtered = self.lines.clone();
     }
 
