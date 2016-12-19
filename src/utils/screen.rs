@@ -19,47 +19,9 @@ pub enum Status {
     Error,
 }
 
-trait Print {
-    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
-    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color);
-}
-
-impl Print for RustBox {
-    
-    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color) {
-        for x in 0..(self.width()) {
-            let ch = item.chars().nth(x).unwrap_or(' ');
-            self.print_char(x, y, rustbox::RB_NORMAL, fg, bg, ch);
-        }
-    }
-
-    
-    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color) {
-
-        let mut cursor = start;
-        
-        for line in item.split("\n") {
-            
-            // fold string if line lingth longer than window widht
-            if line.chars().count() > self.width() {
-                
-                let (first, last) = line.split_at(self.width());
-                self.print_line(cursor,    first, fg, bg);
-                self.print_line(cursor + 1, last, fg, bg);
-                cursor += 2;
-                continue;
-                
-            }
-            
-            self.print_line(cursor, line, fg, bg);
-            cursor += 1;
-        }
-    }
-}
-
-
+// Screen parts
 pub struct Screen {
-    header:     String,
+    header:   String,
     lines:    Vec<String>, 
     prompt:   String,
     // offset: usize,    
@@ -228,3 +190,42 @@ impl Screen {
     
 }
 
+
+trait Print {
+    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color);
+    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color);
+}
+
+
+impl Print for RustBox {
+    
+    fn print_line(&self, y: usize, item: &str, fg: Color, bg: Color) {
+        for x in 0..(self.width()) {
+            let ch = item.chars().nth(x).unwrap_or(' ');
+            self.print_char(x, y, rustbox::RB_NORMAL, fg, bg, ch);
+        }
+    }
+
+    
+    fn print_lines(&self, start: usize, item: &str, fg: Color, bg: Color) {
+
+        let mut cursor = start;
+        
+        for line in item.split("\n") {
+            
+            // fold string if line lingth longer than window widht
+            if line.chars().count() > self.width() {
+                
+                let (first, last) = line.split_at(self.width());
+                self.print_line(cursor,    first, fg, bg);
+                self.print_line(cursor + 1, last, fg, bg);
+                cursor += 2;
+                continue;
+                
+            }
+            
+            self.print_line(cursor, line, fg, bg);
+            cursor += 1;
+        }
+    }
+}
