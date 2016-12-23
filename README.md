@@ -7,4 +7,7 @@ The interactive tool for AWS CLI written in Rust
 
 ## Feature
 
+## Supported Services by Rawst
 
+###  AWS
+  - Kinesis Streem
