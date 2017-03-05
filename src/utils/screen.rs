@@ -45,7 +45,7 @@ impl Screen {
             header: String::new(),
             lines: vec!(),
             filtered: vec!(),
-            prompt: "🍓  ".to_owned(),
+            prompt: "💠   ".to_owned(),
             y_offset: 1,
             query: String::new(),
             cursor: 0,
