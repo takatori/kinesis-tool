@@ -1,23 +1,17 @@
-# 💠 Rawst
+# 💠 Rawst 💠 
 
 The interactive tool for AWS CLI written in Rust
 
-![gif](img/rawst.gif)
 
-
-## Feature
-
-## Supported Services by Rawst
-
-###  AWS
-  - Kinesis Streem
-
+## Supported Services
+### AWS
+- Kinesis Streem
 
 
 ### Build
 
 ```
-$ cargo run
+$ cargo build
 ```
 
 if you encounter following error
@@ -32,4 +26,11 @@ please set these environment variables.
 ``` bash
 $ export OPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include
 $ export DEP_OPENSSL_INCLUDE=/usr/local/opt/openssl/include
+```
+
+
+### How to Use
+
+``` bash
+$ cargo run 
 ```
