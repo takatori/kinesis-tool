@@ -12,7 +12,28 @@ use rusoto::{DefaultCredentialsProvider, Region};
 use kinesis::controller;
 
 pub fn run() {
-    let credential_provider = DefaultCredentialsProvider::new().unwrap();
-    let client              = Client::new();        
-    controller::run(credential_provider, client, Region::ApNortheast1);
+    top();
+    // let credential_provider = DefaultCredentialsProvider::new().unwrap();
+    // let client              = Client::new();        
+    // controller::run(credential_provider, client, Region::ApNortheast1);
+}
+
+
+pub fn top() {
+
+    println!(r###"
+-----------------------------------------
+
+██████╗  █████╗ ██╗    ██╗███████╗████████╗
+██╔══██╗██╔══██╗██║    ██║██╔════╝╚══██╔══╝
+██████╔╝███████║██║ █╗ ██║███████╗   ██║   
+██╔══██╗██╔══██║██║███╗██║╚════██║   ██║   
+██║  ██║██║  ██║╚███╔███╔╝███████║   ██║   
+╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝   ╚═╝   
+
+------------------------------------------                                           
+
+rawst is the interactive tool for AWS CLI written in Rust.
+
+"###);
 }
