@@ -18,6 +18,7 @@ enum State {
 }
 
 
+
 pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, region: Region) {
     
     let kinesis_helper = KinesisHelper::new(client, credential_provider, region);
@@ -28,22 +29,7 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
         
         state = match state {
             
-            State::Root => {
-
-                let commands = vec!["l".to_string(), "q".to_string()];
-                screen.update_screen("🍓  Kinesis", &commands);
-
-                match screen.select_line() {
-                    Status::Error | Status::Quit => State::End,
-                    Status::Selected(ref c) if c == "l" => {
-                        match kinesis_helper.list_streams() {
-                            Ok(streams) => State::StreamList(streams),
-                            Err(e) =>  State::Root
-                        }
-                    }
-                    _ => State::Root
-                }                    
-            },
+            State::Root => root(screen, kinesis_helper),
             State::StreamList(streams) => {
 
                 screen.update_screen("🍓  Kinesis > Streams", &streams);
@@ -115,4 +101,22 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
         };
         
     }
+}
+
+
+fn root(screen: &mut Screen, kinesis_helper: &KinesisHelper) -> State {
+
+    let commands = vec!["l".to_string(), "q".to_string()];
+    screen.update_screen("🍓  Kinesis", &commands);
+
+    match screen.select_line() {
+        Status::Error | Status::Quit => State::End,
+        Status::Selected(ref c) if c == "l" => {
+            match kinesis_helper.list_streams() {
+                Ok(streams) => State::StreamList(streams),
+                Err(e) =>  State::Root
+            }
+        }
+        _ => State::Root
+    }                        
 }
