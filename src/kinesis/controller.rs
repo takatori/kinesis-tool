@@ -29,38 +29,9 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
         
         state = match state {
             
-            State::Root => root(screen, kinesis_helper),
-            State::StreamList(streams) => {
-
-                screen.update_screen("🍓  Kinesis > Streams", &streams);
-
-                match screen.select_line() {
-                    Status::Error | Status::Quit => State::End,
-                    Status::Selected(stream_name) => {
-                        match kinesis_helper.describe_shards(&stream_name) {
-                            Ok(shards) => State::ShardList(stream_name.to_string(), shards),
-                            Err(e) => State::Root,
-                        } 
-                    }
-                    _ => State::Root
-                }
-            },
-            State::ShardList(stream_name, shards) => {
-                
-                screen.update_screen("🍓  Kinesis > Streams > Shards", &shards);
-
-                match screen.select_line() {
-                    Status::Error | Status::Quit => State::End,
-                    Status::Selected(shard_id) => {
-                        match kinesis_helper.get_shard_iterator(&stream_name, &shard_id) {
-                            Ok(shard_iterator) => State::RecordList(shard_iterator),
-                            Err(e) => State::Root,
-                        }
-                    }
-                    _ => State::Root
-                }                    
-
-            },
+            State::Root                           => root(screen, kinesis_helper),
+            State::StreamList(streams)            => stream_list(screen, kinesis_helper, streams),            
+            State::ShardList(stream_name, shards) => shared_list(screen, kinesis_helper, stream_name, shards),
             State::RecordList(shard_iterator) => {
 
                 match kinesis_helper.get_records(&shard_iterator) {
@@ -119,4 +90,38 @@ fn root(screen: &mut Screen, kinesis_helper: &KinesisHelper) -> State {
         }
         _ => State::Root
     }                        
+}
+
+
+fn stream_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, stream: Vec<String>) -> State {
+    
+    screen.update_screen("🍓  Kinesis > Streams", &streams);
+
+    match screen.select_line() {
+        Status::Error | Status::Quit => State::End,
+        Status::Selected(stream_name) => {
+            match kinesis_helper.describe_shards(&stream_name) {
+                Ok(shards) => State::ShardList(stream_name.to_string(), shards),
+                Err(e) => State::Root,
+            } 
+        }
+        _ => State::Root
+    }    
+}
+
+fn shared_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, stream_name: &str, shards: Vec<String>) -> State {
+    
+    screen.update_screen("🍓  Kinesis > Streams > Shards", &shards);
+
+    match screen.select_line() {
+        Status::Error | Status::Quit => State::End,
+        Status::Selected(shard_id) => {
+            match kinesis_helper.get_shard_iterator(&stream_name, &shard_id) {
+                Ok(shard_iterator) => State::RecordList(shard_iterator),
+                Err(e) => State::Root,
+            }
+        }
+        _ => State::Root
+    }                    
+    
 }
