@@ -17,8 +17,6 @@ enum State {
     Record(String, String), // itrator_id, record
 }
 
-
-
 pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, region: Region) {
     
     let kinesis_helper = KinesisHelper::new(client, credential_provider, region);
@@ -26,51 +24,16 @@ pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, regi
     let mut state: State = State::Root; 
     
     loop {
-        
         state = match state {
-            
-            State::Root                           => root(screen, kinesis_helper),
-            State::StreamList(streams)            => stream_list(screen, kinesis_helper, streams),            
-            State::ShardList(stream_name, shards) => shared_list(screen, kinesis_helper, stream_name, shards),
-            State::RecordList(shard_iterator) => {
-
-                match kinesis_helper.get_records(&shard_iterator) {
-                    
-                    Ok((results, iterator)) => {
-
-                        screen.update_screen("🍓  Kinesis > Streams > Shards > Records",
-                                             &kinesis_helper.decode_records(&results));
-                        
-                        match screen.select_line() {
-                            Status::Error | Status::Quit => State::End,
-                            Status::Selected(ref c) if c == "n" => {
-                                match iterator {
-                                    Some(iterator) => State::RecordList(iterator),
-                                    None => State::Root
-                                }
-                            },
-                            Status::Selected(ref record) => State::Record(shard_iterator, record.to_string()),
-                            _ => State::Root
-                        }
-                    },
-                    Err(e) => State::Root,
-                }
-            },
-            State::Record(shard_iterator, record) => {
-
-                screen.update_screen("🍓  Kinesis > Streams > Shards > Records > Record", &vec!(String::new()));
-                
-                match screen.render(&kinesis_helper.format_record(&record)) {
-                    Status::Error | Status::Quit => State::End,
-                    Status::Escaped  => State::RecordList(shard_iterator),
-                    _ => State::Root
-                }                                                            
-            }
+            State::Root                           => root(&screen, &kinesis_helper),
+            State::StreamList(streams)            => stream_list(&screen, &kinesis_helper, streams),
+            State::ShardList(stream_name, shards) => shared_list(&screen, &kinesis_helper, stream_name, shards),
+            State::RecordList(shard_iterator)     => record_list(&screen, &kinesis_helper, shard_iterator),
+            State::Record(shard_iterator, record) => record(&screen, &kinesis_helper, shard_iterator, record),
             State::End => {
                 break;
             }
         };
-        
     }
 }
 
@@ -93,7 +56,7 @@ fn root(screen: &mut Screen, kinesis_helper: &KinesisHelper) -> State {
 }
 
 
-fn stream_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, stream: Vec<String>) -> State {
+fn stream_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, streams: Vec<String>) -> State {
     
     screen.update_screen("🍓  Kinesis > Streams", &streams);
 
@@ -124,4 +87,39 @@ fn shared_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, stream_name:
         _ => State::Root
     }                    
     
+}
+
+fn record_list(screen: &mut Screen, kinesis_helper: &KinesisHelper, shard_iterator: String) -> State {
+
+    match kinesis_helper.get_records(&shard_iterator) {
+        
+        Ok((results, iterator)) => {
+
+            screen.update_screen("🍓  Kinesis > Streams > Shards > Records",
+                                 &kinesis_helper.decode_records(&results));
+            
+            match screen.select_line() {
+                Status::Error | Status::Quit => State::End,
+                Status::Selected(ref c) if c == "n" => {
+                    match iterator {
+                        Some(iterator) => State::RecordList(iterator),
+                        None => State::Root
+                    }
+                },
+                Status::Selected(ref record) => State::Record(&shard_iterator, record.to_string()),
+                _ => State::Root
+            }
+        },
+        Err(e) => State::Root,
+    }    
+}
+
+fn record(screen: &mut Screen, kinesis_helper: &KinesisHelper, shard_iterator: String, record: String) -> State {
+    screen.update_screen("🍓  Kinesis > Streams > Shards > Records > Record", &vec!(String::new()));
+    
+    match screen.render(&kinesis_helper.format_record(&record)) {
+        Status::Error | Status::Quit => State::End,
+        Status::Escaped  => State::RecordList(shard_iterator),
+        _ => State::Root
+    }                       
 }
