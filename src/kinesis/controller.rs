@@ -13,9 +13,10 @@ enum State {
     End,
     StreamList(Vec<String>),
     ShardList(String, Vec<String>), 
-    RecordList(String),  // iterator_id, records
+    RecordList(String),
     Record(String, String), // itrator_id, record
 }
+
 
 pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, region: Region) {
     
