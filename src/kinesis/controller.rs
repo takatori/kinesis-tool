@@ -2,11 +2,11 @@ use hyper::Client;
 use super::helper::KinesisHelper;
 use utils::screen::Screen;
 use utils::screen::Status;
-
 use rusoto::{
     DefaultCredentialsProvider,
     Region
 };
+
 
 enum State {
     Root,
@@ -14,7 +14,7 @@ enum State {
     StreamList(Vec<String>),
     ShardList(String, Vec<String>), 
     RecordList(String),
-    Record(String, String), // itrator_id, record
+    Record(String, String),
 }
 
 
