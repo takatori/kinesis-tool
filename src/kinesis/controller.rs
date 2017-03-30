@@ -17,6 +17,28 @@ enum State {
     Record(String, String),
 }
 
+trait Controller {
+    fn run(&self, credential_provider: DefaultCredentialsProvider, client: Client, region: Region) -> ()
+}
+
+
+struct KinesisController {
+    kinesis_helper: KinesisHelper,
+    screen: Screen,
+}
+
+
+impl KinesisController {
+
+    pub fn new() -> KinesisController {
+        
+    }
+
+    fn root() -> State {
+        
+    }
+}
+
 
 pub fn run(credential_provider: DefaultCredentialsProvider, client: Client, region: Region) {
     
