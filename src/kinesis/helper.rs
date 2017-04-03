@@ -21,12 +21,15 @@ use rusoto::kinesis::{
 use serde_json;
 use serde_json::Value;
 
-pub struct KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
+pub struct KinesisHelper<P, D>
+    where P: ProvideAwsCredentials,
+          D: DispatchSignedRequest {
     client: KinesisClient<P, D>,
 }
 
-
-impl <P, D>KinesisHelper<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {
+impl <P, D>KinesisHelper<P, D>
+    where P: ProvideAwsCredentials,
+          D: DispatchSignedRequest {
     
     pub fn new(request_dispatcher: D, credentials_provider: P, region: Region) -> KinesisHelper<P, D> {
         
