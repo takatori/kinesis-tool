@@ -36,6 +36,7 @@ pub fn top() {
 rawst is the interactive tool for AWS CLI written in Rust.
 
 1) AWS
+2) GCP
 
 "###);
 }
