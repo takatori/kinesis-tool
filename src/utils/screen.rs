@@ -8,10 +8,8 @@ use self::rustbox::Event::KeyEvent;
 use self::regex::Regex;
 
 
-// Error 
-
 // Screen Status
-pub enum Status {
+pub enum ScreenStatus {
     Selected(String),
     Escaped,
     Continue,
@@ -63,24 +61,21 @@ impl Screen {
         self.filtered = self.lines.clone();
     }
 
-    pub fn render(&self, item: &str) -> Status {
+    pub fn render(&self, item: &str) -> ScreenStatus {
         
         self.rustbox.clear();
-
         self.rustbox.print_lines(0, &self.header, Color::Green, Color::Black);
         self.rustbox.print_lines(self.header.lines().count(), item, Color::Blue, Color::Black);        
-        
         self.rustbox.present();
 
         match self.rustbox.poll_event(false) {
-
-            Ok(KeyEvent(Key::Char('q'))) => Status::Quit,
-            _ => Status::Escaped
+            Ok(KeyEvent(Key::Char('q'))) => ScreenStatus::Quit,
+            _ => ScreenStatus::Escaped
         }
     }
     
 
-    pub fn select_line(&mut self) -> Status {
+    pub fn select_line(&mut self) -> ScreenStatus {
         
         loop {
             
@@ -89,8 +84,8 @@ impl Screen {
             match self.rustbox.poll_event(false) {
                 Err(err) => panic!("{:?}", err),
                 Ok(event) => match self.handle_event(event) {
-                    Ok(Status::Selected(s)) => return Status::Selected(s),
-                    Ok(Status::Quit) => return Status::Quit,                    
+                    Ok(ScreenStatus::Selected(s)) => return ScreenStatus::Selected(s),
+                    Ok(ScreenStatus::Quit) => return ScreenStatus::Quit,                    
                     _ => (),
                 }
             }
@@ -98,25 +93,25 @@ impl Screen {
     }
     
 
-    fn handle_event(&mut self, event: rustbox::Event) -> Result<Status, Box<Error>> {
+    fn handle_event(&mut self, event: rustbox::Event) -> Result<ScreenStatus, Box<Error>> {
         
         match event {
-            KeyEvent(Key::Enter)     => Ok(Status::Selected(self.filtered[self.cursor].to_owned())),
-            KeyEvent(Key::Esc)       => Ok(Status::Escaped),
-            KeyEvent(Key::Char('q')) => Ok(Status::Quit),
-            KeyEvent(Key::Char(c))   => self.append_query(c).and(Ok(Status::Continue)),            
-            KeyEvent(Key::Backspace) => self.remove_query().and(Ok(Status::Continue)),
+            KeyEvent(Key::Enter)     => Ok(ScreenStatus::Selected(self.filtered[self.cursor].to_owned())),
+            KeyEvent(Key::Esc)       => Ok(ScreenStatus::Escaped),
+            KeyEvent(Key::Char('q')) => Ok(ScreenStatus::Quit),
+            KeyEvent(Key::Char(c))   => self.append_query(c).and(Ok(ScreenStatus::Continue)),            
+            KeyEvent(Key::Backspace) => self.remove_query().and(Ok(ScreenStatus::Continue)),
             KeyEvent(Key::Up) |
             KeyEvent(Key::Ctrl('p')) => {
                 self.cursor_up();
-                Ok(Status::Continue)
+                Ok(ScreenStatus::Continue)
             },
             KeyEvent(Key::Down) |
             KeyEvent(Key::Ctrl('n')) => {
                 self.cursor_down();
-                Ok(Status::Continue)
+                Ok(ScreenStatus::Continue)
             },
-            _ => Ok(Status::Continue),            
+            _ => Ok(ScreenStatus::Continue),            
         }
     }
 
