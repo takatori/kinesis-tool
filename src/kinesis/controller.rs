@@ -21,7 +21,6 @@ enum State {
 struct KinesisController {
     kinesis_helper: KinesisHelper<DefaultCredentialsProvider, Client>,
     screen: Screen,
-    state: State,
 }
 
 
@@ -34,7 +33,6 @@ impl KinesisController {
         KinesisController {
             kinesis_helper: KinesisHelper::new(client, credential_provider, region),
             screen: Screen::new(),
-            state: State::Root             
         }
         
     }
@@ -43,8 +41,10 @@ impl KinesisController {
     /// Event Loop
     pub fn run(&mut self) {
 
+        let mut state = State::Root;
+            
         loop {
-            self.state = match &self.state {
+            state = match state {
                 State::Root                           => self.root(),
                 State::StreamList(streams)            => self.stream_list(streams),
                 State::ShardList(stream_name, shards) => self.shared_list(stream_name, shards),
