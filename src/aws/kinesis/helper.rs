@@ -1,15 +1,14 @@
 use std::default::Default;
 use std::error::Error;
 use std::io::prelude::*;
-use flate2::read::GzDecoder;
-    
-use rusoto::{
+
+use aws::rusoto::{
     ProvideAwsCredentials,
     DispatchSignedRequest,
     Region,
 };
 
-use rusoto::kinesis::{
+use aws::rusoto::kinesis::{
     KinesisClient,
     ListStreamsInput,
     DescribeStreamInput,
@@ -18,8 +17,10 @@ use rusoto::kinesis::{
     Record,
 };
 
-use serde_json;
-use serde_json::Value;
+use ::flate2::read::GzDecoder;
+use ::serde_json;
+use ::serde_json::Value;
+
 
 pub struct KinesisHelper<P, D>
     where P: ProvideAwsCredentials,

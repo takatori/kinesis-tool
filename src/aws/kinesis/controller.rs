@@ -1,12 +1,13 @@
-use hyper::Client;
-use super::helper::KinesisHelper;
-use utils::screen::Screen;
-use utils::screen::ScreenStatus;
-use rusoto::{
+use aws::rusoto::{
     DefaultCredentialsProvider,
     Region
 };
 
+use ::hyper::Client;
+use ::utils::screen::Screen;
+use ::utils::screen::ScreenStatus;
+
+use helper::KinesisHelper;
 
 enum State {
     Root,
