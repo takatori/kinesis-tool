@@ -1,3 +1,4 @@
+
 use aws::rusoto::{
     DefaultCredentialsProvider,
     Region
@@ -7,7 +8,7 @@ use ::hyper::Client;
 use ::utils::screen::Screen;
 use ::utils::screen::ScreenStatus;
 
-use helper::KinesisHelper;
+use super::helper::KinesisHelper;
 
 enum State {
     Root,
@@ -19,7 +20,7 @@ enum State {
 }
 
 
-struct KinesisController {
+pub struct KinesisController {
     kinesis_helper: KinesisHelper<DefaultCredentialsProvider, Client>,
     screen: Screen,
 }

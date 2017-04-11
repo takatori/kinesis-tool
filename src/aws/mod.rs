@@ -4,8 +4,8 @@ mod kinesis;
 // mod ec2;
 
 use std::process;
-use rusoto::{DefaultCredentialsProvider, Region};
-use kinesis::controller::kinesisController;
+use self::kinesis::controller::KinesisController;
+use self::rusoto::{DefaultCredentialsProvider, Region};
 
 use ::hyper::Client;
 use ::utils::screen::Screen;
@@ -49,7 +49,8 @@ impl awsController {
     fn kinesis(&self) {
         let credential_provider = DefaultCredentialsProvider::new().unwrap();
         let client              = Client::new();        
-        kinesisController::run(credential_provider, client, Region::ApNortheast1);                
+        let mut controlelr = KinesisController::new(credential_provider, client, Region::ApNortheast1);
+        controlelr.run();
     }
     
 }
