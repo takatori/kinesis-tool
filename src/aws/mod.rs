@@ -36,6 +36,8 @@ impl awsController {
     \ \__\ \__\ \____________\____\_\  \ 
      \|__|\|__|\|____________|\_________\
                              \|_________|
+
+   select aws service   
    "###, &commands);
 
         match self.screen.select_line() {           
