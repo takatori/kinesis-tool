@@ -2,7 +2,7 @@ use std::process;
 
 use utils::screen::Screen;
 use utils::screen::ScreenStatus;
-
+use aws::awsController;
 
 pub struct topController {
     screen: Screen,
@@ -17,7 +17,7 @@ impl topController {
     }
 
     pub fn run(&mut self) {
-        let commands = vec!["AWS".to_string(), "q".to_string()];
+        let commands = vec!["a".to_string(), "q".to_string()];
         self.screen.update_screen(r###"
    -----------------------------------------
 
@@ -34,12 +34,13 @@ impl topController {
    "###, &commands);
 
         match self.screen.select_line() {           
-            ScreenStatus::Selected(ref c) if c == "0" => self.aws(),
-            _ => process::exit(0),            
+            ScreenStatus::Selected(ref c) if c == "a" => self.aws(),
+            _ => process::exit(0),
         }
     }
 
     fn aws(&self) {
-
+        let mut aws = awsController::new();
+        aws.run();
     }
 }
