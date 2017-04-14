@@ -33,7 +33,8 @@ impl topController {
    rawst is the interactive tool for AWS CLI written in Rust.
    "###, &commands);
 
-        match self.screen.select_line() {           
+        match self.screen.select_line() {
+            ScreenStatus::Error | ScreenStatus::Quit => println!("error"),
             ScreenStatus::Selected(ref c) if c == "a" => self.aws(),
             _ => process::exit(0),
         }
