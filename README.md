@@ -8,7 +8,13 @@ The interactive tool for AWS CLI written in Rust
 - Kinesis Streem
 
 
-### Build
+## Requirement
+
+```
+rustc > 1.15
+```
+
+## Build
 
 ```
 $ cargo build
@@ -29,7 +35,7 @@ $ export DEP_OPENSSL_INCLUDE=/usr/local/opt/openssl/include
 ```
 
 
-### How to Use
+## How to Use
 
 ``` bash
 $ cargo run 
