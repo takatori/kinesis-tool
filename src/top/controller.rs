@@ -35,7 +35,7 @@ impl topController {
 
     pub fn run(&mut self) {
 
-        self.screen.header = header;
+        self.screen.header = header.to_string();
         self.screen.lines  = vec!["aws".to_string(), "q".to_string()];
 
         match self.screen.select_line() {
