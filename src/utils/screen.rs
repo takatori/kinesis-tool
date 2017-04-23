@@ -19,8 +19,8 @@ pub enum ScreenStatus {
 
 // Screen parts
 pub struct Screen {
-    header:   String,
-    lines:    Vec<String>, 
+    pub header:   String,
+    pub lines:    Vec<String>, 
     prompt:   String,
     // offset: usize,    
     y_offset: usize,
